@@ -1,0 +1,109 @@
+<div fxLayout="column" class="components-container-gt-xs" [ngClass.xs]="'components-container-xs'" fxLayoutGap="20px">
+
+    <div fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column" fxLayoutAlign="start space-between" fxLayoutGap="10px">
+
+        <div fxFlex.sm="100" class="cdk-card-holder" fxFlex.lg="100" fxFlex.md="100" fxFlex.sm="100">
+
+            <mat-toolbar class="cards-header">
+                <h1 class="mat-headline center-align">Add item</h1>
+            </mat-toolbar>
+            <form class="add-item-form">
+
+                <div class="cards-container">
+                    <div fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column">
+                        <div fxFlex.xs="100" fxFlex.lg="40" fxFlex.md="40" fxFlex.sm="40" >
+                                <div fxLayout="row">
+                                    <mat-form-field class="example-full-width">
+                                        <input matInput [(ngModel)]="itemModel.title" name="title" placeholder="Title" value="" required>
+                                        <mat-error *ngIf="messages[0]?.invalid == 'title'">{{this.messages[0]?.message}}</mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <div fxLayout="row">
+                                    <mat-form-field class="example-full-width">
+                                        <textarea matInput [(ngModel)]="itemModel.description" name="description" placeholder="Description" required></textarea>
+                                        <mat-error *ngIf="messages[0]?.invalid == 'description'">{{this.messages[0]?.message}}</mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <div fxLayout="row">
+                                    <mat-form-field class="example-full-width">
+                                        <input matInput [(ngModel)]="itemModel.price" name="price" placeholder="Price" value="" required>
+                                        <mat-error *ngIf="messages[0]?.invalid == 'price'">{{this.messages[0]?.message}}</mat-error>                                    
+                                    </mat-form-field>
+                                </div>
+                                <div fxLayout="row">
+                                    <mat-form-field>
+                                        <mat-select placeholder="Add colors" [(ngModel)]="itemModel.color" name="color" multiple required>
+                                            <mat-option *ngFor="let color of colorList" [value]="color">{{color}}</mat-option>
+                                            <mat-error *ngIf="messages[0]?.invalid == 'color'">{{this.messages[0]?.message}}</mat-error>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                <div fxLayout="row">
+                                    <mat-form-field>
+                                        <mat-select placeholder="Add sizes" [(ngModel)]="itemModel.size" name="size" multiple required>
+                                            <mat-option *ngFor="let size of sizeList" [value]="size">{{size}}</mat-option>
+                                            <mat-error *ngIf="messages[0]?.invalid == 'size'">{{this.messages[0]?.message}}</mat-error>                                        
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                <div fxLayout="row">
+                                    <mat-form-field>
+                                        <mat-select placeholder="Related categories" [(ngModel)]="itemModel.category" name="category" multiple required>
+                                            <mat-option *ngFor="let category of categoryList" [value]="category">{{category}}</mat-option>
+                                            <mat-error *ngIf="messages[0]?.invalid == 'category'">{{this.messages[0]?.message}}</mat-error>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            
+                            
+                        </div>
+                        <div fxFlex.xs="100" fxFlex.lg="60" fxFlex.md="60" fxFlex.sm="60" >
+                            <h4 class="mat-subheading-2 center-align">Upload images</h4>
+                            <mat-divider></mat-divider>
+                            <input [ngClass]="{'upload-input': true}" type="file" name="photo" accept="image/*" ng2FileSelect [uploader]="uploader" multiple/>
+                            <div class="image-div" fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column">
+                                <div [ngClass]="{'image-preview-div': true}" fxLayout="row" *ngFor="let item of uploader.queue">
+                                        <button mat-button >
+                                                <img [ngClass]="{'image-preview-custom': true}" (click)="setMainImage(item)" src="" imgPreview [image]="item?._file" class="media-object" />
+                                        </button>
+                                </div>
+                            </div>
+                            <div *ngIf="mainImage">
+                                <h4 class="mat-subheading-2 center-align">Main image</h4>
+                                <mat-divider></mat-divider>
+                                <div class="image-div" fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column">
+                                    <div [ngClass]="{'image-preview-div': true}" fxLayout="row">
+                                        <img [ngClass]="{'image-preview-custom': true}" src="" imgPreview [image]="mainImage?._file" class="media-object" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+
+                            <!-- <div fxLayout="row">
+                                <button type="button" 
+                                    (click)="uploader.uploadAll()" [disabled]="!uploader.getNotUploadedItems().length">
+                                    Upload all
+                                </button>
+                            </div> -->
+
+                        </div>
+                        
+                    </div>
+                    <div *ngIf="messages.length" class="alert alert-danger error-message">
+                        <strong>{{messages[0].type}} !</strong> {{messages[0].message}}
+                    </div>
+                    <div *ngIf="uploader.isUploading">
+                        <mat-progress-bar mode="determinate" value="uploader.progress"></mat-progress-bar>
+                    </div>
+
+                    <div fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column">
+                            <button class="submit-button" (click)="addItem()" mat-raised-button color="primary">Add item</button>
+                    </div>
+                
+                    
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
