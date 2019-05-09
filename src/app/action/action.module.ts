@@ -16,7 +16,8 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpModule } from '@angular/http';
-import {RestserviceService} from './restservice.service'
+import {RestserviceService} from './restservice.service';
+import {MatIconModule} from '@angular/material/icon';
 
 @NgModule({
   imports: [
@@ -32,7 +33,8 @@ import {RestserviceService} from './restservice.service'
     MatButtonModule,
     MatProgressBarModule,
     HttpClientModule,
-    HttpModule
+    HttpModule,
+    MatIconModule
   ],
   declarations: [
     AdditemComponent,

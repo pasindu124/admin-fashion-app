@@ -23,6 +23,7 @@ export class AdditemComponent implements OnInit {
     images: [],
     color: [],
     size: [],
+    category: [],
     price: '',
     title: '',
     description: '',
@@ -67,8 +68,15 @@ export class AdditemComponent implements OnInit {
         }
         refreshData();
         
-  });
-}
+    });
+  }
+
+  removeFromQueue(item: any){
+    if(this.mainImage && item == this.mainImage) {
+      this.mainImage = null;
+    }
+    item.remove();
+  }
 
   addItem() {
     this.saving = true;
@@ -87,15 +95,38 @@ export class AdditemComponent implements OnInit {
           categories: this.itemModel.category,
           mainCategory: this.itemModel.category[0]
         }
-        console.log('data',data);
         this.rest.addItem(data).subscribe((result) => {
-          console.log(result);
+          this.resetModal();
+          this.messages.push(
+            {
+              type: 'success',
+              invalid: 'false',
+              message: 'Item added succesfully.'
+            }
+          )
+          this.saving = false;
         }, (err) => {
           console.log(err);
         });
 
       });
-    } 
+    } else {
+      this.saving = false;
+    }
+  }
+  resetModal() { 
+    this.itemModel = {
+      images: [],
+      color: [],
+      size: [],
+      category: [],
+      price: '',
+      title: '',
+      description: '',
+      mainImage: ''
+    }
+    this.uploader.clearQueue();
+    this.mainImage = null;
   }
 
   validateForm() {

@@ -65,6 +65,8 @@
                                 <div [ngClass]="{'image-preview-div': true}" fxLayout="row" *ngFor="let item of uploader.queue">
                                         <button mat-button >
                                                 <img [ngClass]="{'image-preview-custom': true}" (click)="setMainImage(item)" src="" imgPreview [image]="item?._file" class="media-object" />
+                                                <button class="remove-button" mat-mini-fab (click)="removeFromQueue(item)"><mat-icon>close</mat-icon></button>
+
                                         </button>
                                 </div>
                             </div>
@@ -77,15 +79,6 @@
                                     </div>
                                 </div>
                             </div>
-                            
-
-                            <!-- <div fxLayout="row">
-                                <button type="button" 
-                                    (click)="uploader.uploadAll()" [disabled]="!uploader.getNotUploadedItems().length">
-                                    Upload all
-                                </button>
-                            </div> -->
-
                         </div>
                         
                     </div>
@@ -97,7 +90,7 @@
                     </div>
 
                     <div fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column">
-                            <button class="submit-button" (click)="addItem()" mat-raised-button color="primary">Add item</button>
+                            <button class="submit-button" (click)="addItem()" [disabled]="saving" mat-raised-button color="primary">Add item</button>
                     </div>
                 
                     

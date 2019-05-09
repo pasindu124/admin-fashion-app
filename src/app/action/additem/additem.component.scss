@@ -67,3 +67,12 @@
 	margin-top: 20px;
 	width: 40%;
 }
+
+.remove-button {
+	display: flex;
+	margin-left: 34%;
+	margin-top: -20%;
+	mat-icon {
+		margin-left: 8px;
+	}
+}
