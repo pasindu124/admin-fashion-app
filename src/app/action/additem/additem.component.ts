@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {  FileUploader, FileSelectDirective } from 'ng2-file-upload/ng2-file-upload';
+import { FileUploader, FileSelectDirective } from 'ng2-file-upload/ng2-file-upload';
 import { RestserviceService } from '../restservice.service';
 
 const URL = 'http://localhost:8080/api/upload/';
@@ -13,13 +13,13 @@ const URL = 'http://localhost:8080/api/upload/';
 
 
 export class AdditemComponent implements OnInit {
-  public uploader:FileUploader = new FileUploader({url: URL});
-  
-  
+  public uploader: FileUploader = new FileUploader({ url: URL });
+
+
   colorList = ['Blue', 'Red', 'Purple', 'White', 'Yellow', 'Green'];
   sizeList = ['Size XS', 'Size S', 'Size M', 'Size L', 'Size XL', 'Size XXL'];
   categoryList = ['Men', 'Women'];
-  itemModel:any = {
+  itemModel: any = {
     images: [],
     color: [],
     size: [],
@@ -34,13 +34,13 @@ export class AdditemComponent implements OnInit {
   saving: boolean;
 
 
-  constructor(public rest:RestserviceService) { 
-    this.uploader.onSuccessItem = (item:any, response:string, status:number, headers:any) => { 
-      let res =JSON.parse(response);
-      let imagename = 'public/images/'+res.data.filename;
+  constructor(public rest: RestserviceService) {
+    this.uploader.onSuccessItem = (item: any, response: string, status: number, headers: any) => {
+      let res = JSON.parse(response);
+      let imagename = 'public/images/' + res.data.filename;
       this.itemModel.images.push(imagename);
-      if(item === this.mainImage) {
-        this.itemModel.mainImage = 'public/images/'+res.data.filename;
+      if (item === this.mainImage) {
+        this.itemModel.mainImage = 'public/images/' + res.data.filename;
       }
     }
   }
@@ -56,23 +56,23 @@ export class AdditemComponent implements OnInit {
   finishUploading() {
     return new Promise((resolve, reject) => {
 
-      let refreshData = () =>{
-          let x = 1;  
+      let refreshData = () => {
+        let x = 1;
 
-          if (!this.uploader.isUploading) {
-            resolve(true);
-            return;
-          }
-
-          setTimeout(refreshData, x*1000);
+        if (!this.uploader.isUploading) {
+          resolve(true);
+          return;
         }
-        refreshData();
-        
+
+        setTimeout(refreshData, x * 1000);
+      }
+      refreshData();
+
     });
   }
 
-  removeFromQueue(item: any){
-    if(this.mainImage && item == this.mainImage) {
+  removeFromQueue(item: any) {
+    if (this.mainImage && item == this.mainImage) {
       this.mainImage = null;
     }
     item.remove();
@@ -80,7 +80,7 @@ export class AdditemComponent implements OnInit {
 
   addItem() {
     this.saving = true;
-    if(this.validateForm()) {
+    if (this.validateForm()) {
       this.uploader.uploadAll();
       this.finishUploading().then((res) => {
         let data = {
@@ -114,7 +114,7 @@ export class AdditemComponent implements OnInit {
       this.saving = false;
     }
   }
-  resetModal() { 
+  resetModal() {
     this.itemModel = {
       images: [],
       color: [],
@@ -140,7 +140,7 @@ export class AdditemComponent implements OnInit {
         }
       )
       return false;
-    }else if (!this.itemModel.description) {
+    } else if (!this.itemModel.description) {
       this.messages.push(
         {
           type: 'error',
@@ -150,7 +150,7 @@ export class AdditemComponent implements OnInit {
       )
       return false;
 
-    }else if (!this.itemModel.price) {
+    } else if (!this.itemModel.price) {
       this.messages.push(
         {
           type: 'error',
@@ -160,7 +160,7 @@ export class AdditemComponent implements OnInit {
       )
       return false;
 
-    }else if (!this.itemModel.color.length) {
+    } else if (!this.itemModel.color.length) {
       this.messages.push(
         {
           type: 'error',
@@ -170,7 +170,7 @@ export class AdditemComponent implements OnInit {
       )
       return false;
 
-    }else if (!this.itemModel.size.length) {
+    } else if (!this.itemModel.size.length) {
       this.messages.push(
         {
           type: 'error',
@@ -180,7 +180,7 @@ export class AdditemComponent implements OnInit {
       )
       return false;
 
-    }else if (!this.itemModel.category.length) {
+    } else if (!this.itemModel.category.length) {
       this.messages.push(
         {
           type: 'error',
@@ -190,7 +190,7 @@ export class AdditemComponent implements OnInit {
       )
       return false;
 
-    }else if (isNaN(this.itemModel.price)) {
+    } else if (isNaN(this.itemModel.price)) {
       this.messages.push(
         {
           type: 'error',
@@ -200,7 +200,7 @@ export class AdditemComponent implements OnInit {
       )
       return false;
 
-    }else if (!this.uploader.queue.length) {
+    } else if (!this.uploader.queue.length) {
       this.messages.push(
         {
           type: 'error',
@@ -209,7 +209,7 @@ export class AdditemComponent implements OnInit {
         }
       )
       return false;
-    }else if (this.uploader.queue.length > 5) {
+    } else if (this.uploader.queue.length > 5) {
       this.messages.push(
         {
           type: 'error',
@@ -218,7 +218,7 @@ export class AdditemComponent implements OnInit {
         }
       )
       return false;
-    }else if (!this.mainImage) {
+    } else if (!this.mainImage) {
       this.messages.push(
         {
           type: 'error',
@@ -230,7 +230,7 @@ export class AdditemComponent implements OnInit {
     }
     return true;
 
-    
+
   }
 
 

@@ -8,7 +8,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material';
-import { FormsModule }   from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { FileSelectDirective } from 'ng2-file-upload';
 import {ImagePreview} from './image-preview.directive';
 import {MatDividerModule} from '@angular/material/divider';
@@ -18,6 +18,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpModule } from '@angular/http';
 import {RestserviceService} from './restservice.service';
 import {MatIconModule} from '@angular/material/icon';
+import { OrderComponent } from './order/order.component';
+import { MatTableModule } from '@angular/material';
+import { MatPaginatorModule } from '@angular/material';
+
 
 @NgModule({
   imports: [
@@ -34,12 +38,15 @@ import {MatIconModule} from '@angular/material/icon';
     MatProgressBarModule,
     HttpClientModule,
     HttpModule,
-    MatIconModule
+    MatIconModule,
+    MatTableModule,
+    MatPaginatorModule
   ],
   declarations: [
     AdditemComponent,
     FileSelectDirective,
-    ImagePreview
+    ImagePreview,
+    OrderComponent
   ],
   exports: [
     ImagePreview

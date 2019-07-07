@@ -29,8 +29,12 @@ export class RestserviceService {
       map(this.extractData));
   }
 
+  getOrders(): Observable<any> {
+    return this.http.get(endpoint + 'order').pipe(
+      map(this.extractData));
+  }
+
   addItem (item: any): Observable<any> {
-    console.log(item);
     return this.http.post<any>(endpoint + 'items/', JSON.stringify(item), httpOptions).pipe(
       tap((item) => console.log(`added product w/ id=`)),
       catchError(this.handleError<any>('addItem'))
