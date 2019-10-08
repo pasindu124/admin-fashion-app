@@ -61,7 +61,7 @@
                             <h4 class="mat-subheading-2 center-align">Upload images</h4>
                             <mat-divider></mat-divider>
                             <input [ngClass]="{'upload-input': true}" type="file" name="photo" accept="image/*" ng2FileSelect [uploader]="uploader" multiple/>
-                            <div class="image-div" fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column">
+                            <!-- <div class="image-div" fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column">
                                 <div [ngClass]="{'image-preview-div': true}" fxLayout="row" *ngFor="let item of uploader.queue">
                                         <button mat-button >
                                                 <img [ngClass]="{'image-preview-custom': true}" (click)="setMainImage(item)" src="" imgPreview [image]="item?._file" class="media-object" />
@@ -69,17 +69,39 @@
 
                                         </button>
                                 </div>
+                            </div> -->
+
+                            <div fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column" class="file" *ngFor="let response of responses; let i = index">
+                                <div class="status">
+                                    Uploading... {{response.progress}}%
+                                    <div *ngIf="!response.status">In progress</div>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress" role="progressbar" [style.width.%]="response.progress"></div>
+                                </div>
+                                <div class="image-div">
+                                    <div [ngClass]="{'image-preview-div': true}">
+                                        <button mat-button >
+                                                <img [ngClass]="{'image-preview-custom': true}" (click)="setMainImage(response)" [src]="response.data.url" imgPreview class="media-object" />
+                                                <button class="remove-button" mat-mini-fab (click)="deleteImage(response.data, i)"><mat-icon>close</mat-icon></button>
+
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+
                             <div *ngIf="mainImage">
                                 <h4 class="mat-subheading-2 center-align">Main image</h4>
                                 <mat-divider></mat-divider>
                                 <div class="image-div" fxLayout="row" fxLayout.sm="column" fxLayout.lt-sm="column">
                                     <div [ngClass]="{'image-preview-div': true}" fxLayout="row">
-                                        <img [ngClass]="{'image-preview-custom': true}" src="" imgPreview [image]="mainImage?._file" class="media-object" />
+                                        <img [ngClass]="{'image-preview-custom': true}" [src]="mainImage?.url" imgPreview class="media-object" />
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        
                         
                     </div>
                     <div *ngIf="messages.length" class="alert alert-danger error-message">

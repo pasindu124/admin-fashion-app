@@ -21,6 +21,8 @@ import {MatIconModule} from '@angular/material/icon';
 import { OrderComponent } from './order/order.component';
 import { MatTableModule } from '@angular/material';
 import { MatPaginatorModule } from '@angular/material';
+import { CloudinaryModule } from '@cloudinary/angular-5.x';
+import * as  Cloudinary from 'cloudinary-core';
 
 
 @NgModule({
@@ -40,7 +42,8 @@ import { MatPaginatorModule } from '@angular/material';
     HttpModule,
     MatIconModule,
     MatTableModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    CloudinaryModule.forRoot(Cloudinary, { cloud_name: 'pasindu124', upload_preset: 'nuyp4jky', api_key: '478836332838794', api_secret: 'F5Xwq5HQC-cLGQmQtvGeU7hLpuU'}),
   ],
   declarations: [
     AdditemComponent,

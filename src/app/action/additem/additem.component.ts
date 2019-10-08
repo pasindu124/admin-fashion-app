@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { FileUploader, FileSelectDirective } from 'ng2-file-upload/ng2-file-upload';
+import { Component, OnInit, NgZone } from '@angular/core';
+import { FileUploader, FileSelectDirective , FileUploaderOptions, ParsedResponseHeaders} from 'ng2-file-upload/ng2-file-upload';
 import { RestserviceService } from '../restservice.service';
+import { Cloudinary } from '@cloudinary/angular-5.x';
+import { HttpClient } from '@angular/common/http';
+import * as _ from "lodash";
 
 const URL = 'http://localhost:8080/api/upload/';
 
@@ -13,7 +16,6 @@ const URL = 'http://localhost:8080/api/upload/';
 
 
 export class AdditemComponent implements OnInit {
-  public uploader: FileUploader = new FileUploader({ url: URL });
 
 
   colorList = ['Blue', 'Red', 'Purple', 'White', 'Yellow', 'Green'];
@@ -32,16 +34,105 @@ export class AdditemComponent implements OnInit {
   mainImage: any;
   messages: any = [];
   saving: boolean;
+  private uploader: FileUploader;
+  title = '';
+  responses: Array<any>;
 
 
-  constructor(public rest: RestserviceService) {
+
+  constructor(public rest: RestserviceService, private cloudinary: Cloudinary, private zone: NgZone, private http: HttpClient) {
+    this.title = '';
+    this.responses = [];
+    const uploaderOptions: FileUploaderOptions = {
+      url: `https://api.cloudinary.com/v1_1/${this.cloudinary.config().cloud_name}/upload`,
+      // Upload files automatically upon addition to upload queue
+      autoUpload: true,
+      // Use xhrTransport in favor of iframeTransport
+      isHTML5: true,
+      // Calculate progress independently for each uploaded file
+      removeAfterUpload: true,
+      // XHR request headers
+      headers: [
+        {
+          name: 'X-Requested-With',
+          value: 'XMLHttpRequest'
+        }
+      ]
+    };
+    this.uploader = new FileUploader(uploaderOptions);
+
+
+    this.uploader.onBuildItemForm = (fileItem: any, form: FormData): any => {
+      // Add Cloudinary's unsigned upload preset to the upload form
+      form.append('upload_preset', this.cloudinary.config().upload_preset);
+      // Add built-in and custom tags for displaying the uploaded photo in the list
+      let tags = 'myphotoalbum';
+      if (this.title) {
+        form.append('context', `photo=${this.title}`);
+        tags = `myphotoalbum,${this.title}`;
+      }
+      // Upload to a custom folder
+      // Note that by default, when uploading via the API, folders are not automatically created in your Media Library.
+      // In order to automatically create the folders based on the API requests,
+      // please go to your account upload settings and set the 'Auto-create folders' option to enabled.
+      // Add custom tags
+      form.append('tags', tags);
+      // Add file to upload
+      form.append('file', fileItem);
+
+      // Use default "withCredentials" value for CORS requests
+      fileItem.withCredentials = false;
+      return { fileItem, form };
+    };
+
+    const upsertResponse = fileItem => {
+
+      // Run the update in a custom zone since for some reason change detection isn't performed
+      // as part of the XHR request to upload the files.
+      // Running in a custom zone forces change detection
+      this.zone.run(() => {
+        // Update an existing entry if it's upload hasn't completed yet
+
+        // Find the id of an existing item
+        const existingId = this.responses.reduce((prev, current, index) => {
+          if (current.file.name === fileItem.file.name && !current.status) {
+            return index;
+          }
+          return prev;
+        }, -1);
+        if (existingId > -1) {
+          // Update existing item with new data
+          this.responses[existingId] = Object.assign(this.responses[existingId], fileItem);
+        } else {
+          // Create new response
+          this.responses.push(fileItem);
+        }
+      });
+    };
+
+    // Update model on completion of uploading a file
+    this.uploader.onCompleteItem = (item: any, response: string, status: number, headers: ParsedResponseHeaders) =>
+      upsertResponse(
+        {
+          file: item.file,
+          status,
+          data: JSON.parse(response)
+        }
+      );
+
+    // Update model on upload progress event
+    this.uploader.onProgressItem = (fileItem: any, progress: any) =>
+      upsertResponse(
+        {
+          file: fileItem.file,
+          progress,
+          data: {}
+        }
+      );
+
     this.uploader.onSuccessItem = (item: any, response: string, status: number, headers: any) => {
       let res = JSON.parse(response);
-      let imagename = 'public/images/' + res.data.filename;
-      this.itemModel.images.push(imagename);
-      if (item === this.mainImage) {
-        this.itemModel.mainImage = 'public/images/' + res.data.filename;
-      }
+      this.itemModel.images.push(res.url);
     }
   }
 
@@ -49,8 +140,39 @@ export class AdditemComponent implements OnInit {
 
   }
 
+  deleteImage = function (data: any, index: number) {
+    const url = `https://api.cloudinary.com/v1_1/${this.cloudinary.config().cloud_name}/delete_by_token`;
+    const headers = new Headers({ 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' });
+    const options = { headers: headers };
+    const body = {
+      token: data.delete_token
+    };
+    this.http.post(url, body, options).subscribe(response => {
+      console.log(`Deleted image - ${data.public_id} ${response.result}`);
+      // Remove deleted item for responses
+      this.responses.splice(index, 1);
+      _.remove(this.itemModel.images, function(n) {
+        return n == data.url;
+      });
+      if (this.mainImage && this.mainImage.url == data.url) {
+        this.mainImage = null;
+        this.itemModel.mainImage = null;
+      }
+    });
+  };
+
+  getFileProperties(fileProperties: any) {
+    // Transforms Javascript Object to an iterable to be used by *ngFor
+    if (!fileProperties) {
+      return null;
+    }
+    return Object.keys(fileProperties)
+      .map((key) => ({ 'key': key, 'value': fileProperties[key] }));
+  }
+
   setMainImage(item: any) {
-    this.mainImage = item;
+    this.mainImage = item.data;
+    this.itemModel.mainImage = this.mainImage.url;
   }
 
   finishUploading() {
@@ -81,34 +203,29 @@ export class AdditemComponent implements OnInit {
   addItem() {
     this.saving = true;
     if (this.validateForm()) {
-      this.uploader.uploadAll();
-      this.finishUploading().then((res) => {
-        let data = {
-
-          title: this.itemModel.title,
-          description: this.itemModel.description,
-          price: this.itemModel.price,
-          mainImage: this.itemModel.mainImage,
-          images: this.itemModel.images,
-          sizes: this.itemModel.size,
-          colors: this.itemModel.color,
-          categories: this.itemModel.category,
-          mainCategory: this.itemModel.category[0]
-        }
-        this.rest.addItem(data).subscribe((result) => {
-          this.resetModal();
-          this.messages.push(
-            {
-              type: 'success',
-              invalid: 'false',
-              message: 'Item added succesfully.'
-            }
-          )
-          this.saving = false;
-        }, (err) => {
-          console.log(err);
-        });
-
+      let data = {
+        title: this.itemModel.title,
+        description: this.itemModel.description,
+        price: this.itemModel.price,
+        mainImage: this.itemModel.mainImage,
+        images: this.itemModel.images,
+        sizes: this.itemModel.size,
+        colors: this.itemModel.color,
+        categories: this.itemModel.category,
+        mainCategory: this.itemModel.category[0]
+      }
+      this.rest.addItem(data).subscribe((result) => {
+        this.resetModal();
+        this.messages.push(
+          {
+            type: 'success',
+            invalid: 'false',
+            message: 'Item added succesfully.'
+          }
+        )
+        this.saving = false;
+      }, (err) => {
+        console.log(err);
       });
     } else {
       this.saving = false;
@@ -200,7 +317,7 @@ export class AdditemComponent implements OnInit {
       )
       return false;
 
-    } else if (!this.uploader.queue.length) {
+    } else if (!this.itemModel.images.length) {
       this.messages.push(
         {
           type: 'error',
@@ -209,7 +326,7 @@ export class AdditemComponent implements OnInit {
         }
       )
       return false;
-    } else if (this.uploader.queue.length > 5) {
+    } else if (this.itemModel.images.length > 5) {
       this.messages.push(
         {
           type: 'error',
