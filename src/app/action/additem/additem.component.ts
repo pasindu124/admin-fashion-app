@@ -20,7 +20,7 @@ export class AdditemComponent implements OnInit {
 
   colorList = ['Blue', 'Red', 'Purple', 'White', 'Yellow', 'Green'];
   sizeList = ['Size XS', 'Size S', 'Size M', 'Size L', 'Size XL', 'Size XXL'];
-  categoryList = ['Men', 'Women'];
+  categoryList = ['dress', 'blouse', 'pant', 'kids'];
   itemModel: any = {
     images: [],
     color: [],
